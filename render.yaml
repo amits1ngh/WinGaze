@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: pose-marker-app
+    env: python
+    buildCommand: ""
+    startCommand: gunicorn -w 4 app:app
