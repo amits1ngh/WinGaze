@@ -29,7 +29,3 @@ It integrates timeline annotations with synchronized video playback, performs Me
 ## 🔧 Installation
 📌 **Python 3.9+ recommended**
 
-1️⃣ Clone this repository:
-```bash
-git clone https://github.com/yourusername/WinGaze.git
-cd WinGaze
