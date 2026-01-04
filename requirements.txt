@@ -3,3 +3,6 @@ gunicorn
 opencv-python
 mediapipe
 numpy
+pandas
+PyQt5
+rerun-sdk
