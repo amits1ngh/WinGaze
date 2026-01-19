@@ -5,7 +5,7 @@ except ImportError as exc:
         "pandas module is not installed. Please install it using 'pip install pandas'."
     ) from exc
 
-from core.data_types import SegmentTimes
+from core.data_types import SegmentTimes, TextAnnotation
 
 ELAN_START_COL = "Anfangszeit - msec"
 ELAN_END_COL = "Endzeit - msec"
@@ -40,3 +40,35 @@ def get_segment_times(df, modality: str, start_label: str, end_label: str) -> Se
         start_ms=float(start_row[ELAN_START_COL]),
         end_ms=float(end_row[ELAN_END_COL]),
     )
+
+
+def extract_text_annotations(df, columns):
+    annotations = []
+    if df is None or not columns:
+        return annotations
+    for col in columns:
+        if col not in df.columns:
+            continue
+        series = df[col].dropna()
+        for idx, value in series.items():
+            text = str(value).strip()
+            if not text or text.lower() == "nan":
+                continue
+            start_ms = df.at[idx, ELAN_START_COL]
+            end_ms = df.at[idx, ELAN_END_COL]
+            if pd.isna(start_ms) or pd.isna(end_ms):
+                continue
+            start_ms = float(start_ms)
+            end_ms = float(end_ms)
+            if end_ms < start_ms:
+                continue
+            annotations.append(
+                TextAnnotation(
+                    start_ms=start_ms,
+                    end_ms=end_ms,
+                    speaker=str(col).strip(),
+                    text=text,
+                )
+            )
+    annotations.sort(key=lambda ann: (ann.start_ms, ann.end_ms, ann.speaker))
+    return annotations

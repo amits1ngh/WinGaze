@@ -1,22 +1,8 @@
-**WinGaze** is a **rerun and PyQt5 based application** for aligning multimodal signals, csv export, analysis, and visualization in Human Robot Interaction experiments.  
-It integrates timeline annotations with synchronized video playback, performs real time MediaPipe-based hand tracking, and provides real-time plots and video panels in Rerun.
+**WinGaze** is a Rerun- and PyQt5-based application that enables the alignment of online multimodal signals (gaze and pose) from multiple camera views and through remote/mobile eye trackers within multiparty interactional studies involving human-human or human-robot interactions.
+The tool also allows visualization of specific times of interest and exports CSV files for further analysis.
+It aims to integrate qualitative annotations (e.g., ELAN) with synchronized video playback and performs real-time pose tracking and gaze estimation to provide real-time plots and video playback.
 
----
 
-## 🚀 Features
-✅ Load **ELAN timeline annotation files (.txt)** to segment videos  
-✅ Synchronize a **main video** with optional **eye-tracking metrics/video**  
-✅ Run **hand tracking** on frames using **MediaPipe Hands**  
-✅ Display:
-- Velocity over time
-- Mean X and Y hand positions
-✅ Export all tracking data to **CSV**  
-✅ Filter by action hand **Left / Right / Both hands**  
-✅ PyQt5 GUI with:
-- Dropdowns for timeline selection
-- Rerun viewer for video panels and time-series plotting
-
----
 
 ## 🎬 Screenshots
 <div align="center">
@@ -57,9 +43,7 @@ WinGaze/
   WinGaze.py   # Entry point wrapper
 ```
 
----
 
 ## Publication
-If you use WinGaze in academic work, please cite:
 
 Singh, A., Wrede, B., Birte, R., Groß, A., & Rohlfing, K. J. (2025). "Manners Matter: Action history guides attention and repair choices during interaction." *IEEE International Conference on Development and Learning*. https://doi.org/10.1109/ICDL63968.2025.11204385

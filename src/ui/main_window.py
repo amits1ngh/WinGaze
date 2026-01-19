@@ -1,3 +1,5 @@
+import os
+
 try:
     from PyQt5.QtWidgets import (
         QMainWindow,
@@ -24,7 +26,8 @@ except ImportError as exc:
 
 from config.settings import AppConfig
 from core.hand_tracking import HandTracker
-from data_io.elan_reader import read_elan_file, get_segment_times
+from data_io.elan_reader import read_elan_file, get_segment_times, extract_text_annotations
+from data_io.fixation_reader import read_fixations_csv
 from data_io.exporter import export_tracking_data
 from vis.rerun_logger import RerunLogger
 
@@ -49,6 +52,9 @@ class ELANVideoPlayer(QMainWindow):
         self.video_loaded = False
         self.raw_data = []
         self.elan_df = None
+        self.speech_annotations = []
+        self.speech_columns = []
+        self.speech_speaker_order = []
 
         self.hand_tracker = HandTracker(
             max_num_hands=self.config.max_num_hands,
@@ -56,6 +62,45 @@ class ELANVideoPlayer(QMainWindow):
             min_tracking_confidence=self.config.min_tracking_confidence,
             enable_segmentation=self.config.mask_participant,
         )
+
+    @staticmethod
+    def _resolve_path(path: str) -> str:
+        if os.path.isabs(path):
+            return path
+        root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        return os.path.join(root, path)
+
+    def _load_aoi_fixations(self):
+        fixations = []
+        sources = [
+            ("Robot", self.config.fixation_robot_path),
+            ("Task", self.config.fixation_task_path),
+        ]
+        for label, path in sources:
+            resolved = self._resolve_path(path)
+            if not os.path.exists(resolved):
+                continue
+            try:
+                fixations.extend(
+                    read_fixations_csv(
+                        resolved,
+                        label,
+                        time_col=self.config.fixation_time_col,
+                        start_col=self.config.fixation_start_col,
+                        duration_col=self.config.fixation_duration_col,
+                        time_scale=self.config.fixation_time_scale,
+                        duration_scale=self.config.fixation_duration_scale,
+                        fixation_id_col=self.config.fixation_id_col,
+                        dedupe=self.config.fixation_dedupe,
+                    )
+                )
+            except Exception as exc:
+                QMessageBox.warning(
+                    self,
+                    "Fixation Load Warning",
+                    f"Failed to load {resolved}: {exc}",
+                )
+        return fixations
 
     def _setup_ui(self) -> None:
         self.central_widget = QWidget()
@@ -122,6 +167,15 @@ class ELANVideoPlayer(QMainWindow):
             self.modality_columns = modality_columns
             self.modality_dropdown.clear()
             self.modality_dropdown.addItems(self.modality_columns)
+            self.speech_columns = [
+                col
+                for col in df.columns
+                if any(
+                    key in str(col).strip().lower() for key in ("participant", "robot")
+                )
+            ]
+            self.speech_speaker_order = [str(col).strip() for col in self.speech_columns]
+            self.speech_annotations = extract_text_annotations(df, self.speech_columns)
             self._mark_loaded(self.elan_button)
         except Exception as exc:
             QMessageBox.critical(self, "Error", f"Failed to load .txt file: {exc}")
@@ -192,6 +246,24 @@ class ELANVideoPlayer(QMainWindow):
             self.hand_tracker.reset()
             if self.rerun_logger:
                 self.rerun_logger.start_segment(self.start_time)
+                self.rerun_logger.set_speech_annotations(
+                    self.speech_annotations,
+                    speaker_order=self.speech_speaker_order,
+                    segment_start_ms=self.start_time,
+                    segment_end_ms=self.end_time,
+                )
+                fixations = self._load_aoi_fixations()
+                if fixations:
+                    self.rerun_logger.set_aoi_probabilities(
+                        fixations,
+                        bin_ms=self.config.rerun.aoi_bin_ms,
+                        smooth_kind=self.config.rerun.aoi_smooth_kind,
+                        smooth_ms=self.config.rerun.aoi_smooth_ms,
+                        include_none=self.config.rerun.aoi_include_none,
+                        segment_start_ms=self.start_time,
+                        segment_end_ms=self.end_time,
+                        eyetrack_offset_ms=self.config.eyetrack_offset_ms,
+                    )
         except Exception as exc:
             QMessageBox.critical(self, "Playback Error", str(exc))
 
