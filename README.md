@@ -1,4 +1,5 @@
 **WinGaze** is a Rerun- and PyQt5-based application that enables the alignment of online multimodal signals (gaze and pose) from multiple camera views and through remote/mobile eye trackers within multiparty interactional studies involving human-human or human-robot interactions.
+
 The tool also allows visualization of specific times of interest and exports CSV files for further analysis.
 It aims to integrate qualitative annotations (e.g., ELAN) with synchronized video playback and performs real-time pose tracking and gaze estimation to provide real-time plots and video playback.
 
@@ -16,7 +17,7 @@ It aims to integrate qualitative annotations (e.g., ELAN) with synchronized vide
 
 1️⃣ Clone this repository:
 ```bash
-git clone https://github.com/yourusername/WinGaze.git
+git clone https://github.com/amits1ngh/WinGaze.git
 cd WinGaze
 pip install -r requirements.txt
 ```
