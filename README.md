@@ -7,7 +7,7 @@ It aims to integrate qualitative annotations (e.g., ELAN) with synchronized vide
 
 ## 🎬 Screenshots
 <div align="center">
-  <img src="uploads/WinGaze-demo.png" width="600" alt="WinGaze GUI">
+  <img src="uploads/WinGaze-demo.gif" width="600" alt="WinGaze GUI">
 </div>
 
 ---
